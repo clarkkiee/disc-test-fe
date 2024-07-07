@@ -4,7 +4,6 @@ import {
   useState,
   useEffect,
   useCallback,
-  Provider,
 } from "react";
 
 import { getAuthToken } from "./AuthTokenService";
