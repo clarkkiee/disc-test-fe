@@ -9,6 +9,7 @@ import {
   FieldProps,
 } from "formik";
 import { registerUser } from "@/services/UserActionServices";
+import { useRouter } from "next/navigation";
 
 interface BiodataFields {
 email: string;
@@ -21,6 +22,9 @@ email: string;
 }
 
 const BiodataForm: React.FC<{}> = () => {
+
+  const router = useRouter()
+
   const initialValues: BiodataFields = {
     email: "",
     name: "",
@@ -32,8 +36,8 @@ const BiodataForm: React.FC<{}> = () => {
   };
 
   const handleSubmit = async (values: BiodataFields) => {
-    await registerUser(values)
-    alert(JSON.stringify(values, null, 2));
+    const res = await registerUser(values)
+    router.push(`/disc/${res.examSessionId}?question=1`)
   };
 
   return (
