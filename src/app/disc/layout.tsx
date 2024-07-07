@@ -1,6 +1,8 @@
 "use client";
 
 import { AuthContextProvider } from "@/services/AuthContext";
+import { Suspense } from "react";
+import Loading from "./loading";
 
 export default function RootLayout({
   children,
@@ -9,7 +11,9 @@ export default function RootLayout({
 }>) {
   return (
     <AuthContextProvider>
-      <div>{children}</div>
+      <Suspense fallback={<Loading/>}>
+        {children}
+      </Suspense>
     </AuthContextProvider>
   );
 }
