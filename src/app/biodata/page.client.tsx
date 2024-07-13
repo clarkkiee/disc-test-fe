@@ -21,6 +21,12 @@ email: string;
   source_information: string;
 }
 
+type entryExamSession = {
+  userId: string;
+  authorization: string;
+  examSessionId: string;
+}
+
 const BiodataForm: React.FC<{}> = () => {
 
   const router = useRouter()
@@ -36,7 +42,10 @@ const BiodataForm: React.FC<{}> = () => {
   };
 
   const handleSubmit = async (values: BiodataFields) => {
-    const res = await registerUser(values)
+    const res: entryExamSession = await registerUser(values)
+    if(!res){
+      router.refresh()
+    }
     router.push(`/disc/${res.examSessionId}?question=1`)
   };
 
