@@ -43,9 +43,9 @@ const BiodataForm: React.FC<{}> = () => {
 
   const handleSubmit = async (values: BiodataFields) => {
     try {
-      const res = await registerUser(values)
+      const res : entryExamSession = await registerUser(values)
       const examSessionId = res.examSessionId
-      if(!examSessionId){
+      if(!examSessionId || examSessionId === null || examSessionId === undefined){
         router.refresh()
       } else {
         router.push(`/disc/${examSessionId}?question=1`)
