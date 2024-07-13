@@ -17,3 +17,18 @@ export async function getAllQuestions(){
         return null
     }
 }
+
+export async function getQuestionsById(id: string){
+    try {
+        const token = await getAuthToken()
+        const res = await apiClient.get(`/exam/question/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return res.data.data
+    } catch (error) {
+        console.error(error)
+        return null
+    }
+}
