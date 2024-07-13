@@ -6,11 +6,7 @@ import { getAuthToken } from "./AuthTokenService";
 export async function getAllQuestions(){
     try {
         const token = await getAuthToken()
-        const res = await apiClient.get('/exam/questions', {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        const res = await apiClient.get('/exam/questions')
         return res.data
     } catch (error) {
         console.error(error)
