@@ -7,7 +7,8 @@ export type ResponseSchema<T> = {
 }
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:8000/api/v1"
+  // baseURL: "http://localhost:8000/api/v1",
+  baseURL: "https://orca-app-tvom4.ondigitalocean.app/api/v1",
 });
 
 export default apiClient;
