@@ -2,8 +2,9 @@
 import { cookies } from "next/headers";
 import apiClient from "./apiClient";
 import { getAuthToken } from "./AuthTokenService";
+import { BiodataFields } from "@/app/biodata/page.client";
 
-export async function registerUser( userData : any ){
+export async function registerUser( userData : BiodataFields ){
     try {
         const response = await apiClient.post('/user/register', userData);
         const token = response.data.data.authorization
