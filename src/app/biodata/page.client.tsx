@@ -11,8 +11,8 @@ import {
 import { registerUser } from "@/services/UserActionServices";
 import { useRouter } from "next/navigation";
 
-interface BiodataFields {
-email: string;
+export interface BiodataFields {
+  email: string;
   name: string;
   birthdate: string;
   latest_education: string;
