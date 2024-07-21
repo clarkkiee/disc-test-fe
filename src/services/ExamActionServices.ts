@@ -55,3 +55,21 @@ export async function submitAnswer(answer: IAnswer[]){
         return null
     }
 }
+
+export async function getExamSessionIdByUserId (){
+    try {
+        const token = await getAuthToken()
+        if(!token) {
+            return null
+        }
+        const res = await apiClient.get('/exam/get-session', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return res.data.data
+    } catch (error) {
+        console.error(error)
+        return null
+    }
+}
