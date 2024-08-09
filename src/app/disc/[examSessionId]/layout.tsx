@@ -1,6 +1,6 @@
 "use client";
 
-import ExamNavigation from "@/app/components/ExamNavigation";
+import ExamNavigation from "@/app/client-components/ExamNavigation";
 import { AuthContextProvider } from "@/services/AuthContext";
 
 export default function RootLayout({
