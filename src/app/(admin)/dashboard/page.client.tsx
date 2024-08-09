@@ -40,7 +40,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { getPaginationData } from "@/services/AdminActionServices";
 // import { Pagination } from "flowbite-react";
@@ -61,8 +61,6 @@ export function Dashboard() {
   const router = useRouter();
   const [userDatas, setUserDatas] = useState<UserData[] | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const searchParams = useSearchParams();
-  const pathname = usePathname()
 
   const onPageChange = (state: string) => {
     let newPage = currentPage;
@@ -133,66 +131,68 @@ export function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Nama</TableHead>
-                    <TableHead>Tanggal Lahir</TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Pendidikan Terakhir
-                    </TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Posisi yang Dilamar
-                    </TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Kota Domisili
-                    </TableHead>
-                    <TableHead>
-                      <span className="sr-only">Actions</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {userDatas?.map((data, index) => (
-                    <TableRow key={data.id} onClick={() => alert(data.id)}>
-                      <TableCell>{data.email}</TableCell>
-                      <TableCell>{data.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {data.birthdate}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {data.latest_education}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {data.position_applied}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {data.domicile_city}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-haspopup="true"
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Toggle menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Nama</TableHead>
+                      <TableHead>Tanggal Lahir</TableHead>
+                      <TableHead className="hidden md:table-cell">
+                        Pendidikan Terakhir
+                      </TableHead>
+                      <TableHead className="hidden md:table-cell">
+                        Posisi yang Dilamar
+                      </TableHead>
+                      <TableHead className="hidden md:table-cell">
+                        Kota Domisili
+                      </TableHead>
+                      <TableHead>
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {userDatas?.map((data, index) => (
+                      <TableRow key={data.id} onClick={() => alert(data.id)}>
+                        <TableCell>{data.email}</TableCell>
+                        <TableCell>{data.name}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.birthdate}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.latest_education}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.position_applied}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {data.domicile_city}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                aria-haspopup="true"
+                                size="icon"
+                                variant="ghost"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>Edit</DropdownMenuItem>
+                              <DropdownMenuItem>Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Suspense>
             </CardContent>
             <CardFooter>
               <div className="text-xs text-muted-foreground">
