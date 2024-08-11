@@ -33,7 +33,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -41,9 +40,7 @@ import {
 } from "@/components/ui/pagination";
 
 import { useEffect, useState, useCallback, Suspense } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 import { getPaginationData } from "@/services/AdminActionServices";
-// import { Pagination } from "flowbite-react";
 import { useRouter } from "next/navigation";
 
 type UserData = {
@@ -57,28 +54,51 @@ type UserData = {
   source_information: string;
 };
 
+type PaginationMetaData = {
+  page: number;
+  limit: number;
+  total: number;
+} | null
+
 export function Dashboard() {
   const router = useRouter();
   const [userDatas, setUserDatas] = useState<UserData[] | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [loading, isLoading] = useState<boolean>(true);
+  const [paginationMetaData, setPaginationMetaData] = useState<PaginationMetaData>(null)
+  const windowSize = 5
 
-  const onPageChange = (state: string) => {
-    let newPage = currentPage;
-    if (state === "next") {
-      newPage = currentPage + 1;
-    } else if (state === "prev") {
-      newPage = currentPage - 1;
-    }
-    setCurrentPage(newPage);
-  };
+  const handleChangePage = (page: number) => {
+    setCurrentPage(page);
+  }
 
   const fetchPaginationData = useCallback(async () => {
+    isLoading(true);
     const userDatasQ = await getPaginationData(currentPage);
-    setUserDatas(userDatasQ);
+    setPaginationMetaData(userDatasQ.meta)
+    setUserDatas(userDatasQ.datas);
+    isLoading(false);
   }, [currentPage]);
 
+  const getPageNumbers = () => {
+    const totalPages = Math.ceil(paginationMetaData!.total / paginationMetaData!.limit);
+    let startPage = Math.max(currentPage - Math.floor(windowSize / 2), 1);
+    let endPage = Math.min(startPage + windowSize - 1, totalPages);
+
+    if (endPage - startPage < windowSize - 1) {
+      startPage = Math.max(endPage - windowSize + 1, 1);
+    }
+
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  };
+
+  const handleDetailPage = ( userId: string ) => {
+    router.push(`dashboard/disc/${userId}/result`)
+    
+  }
+
   useEffect(() => {
-    fetchPaginationData()
+    fetchPaginationData();
   }, [fetchPaginationData]);
 
   return (
@@ -120,18 +140,20 @@ export function Dashboard() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <div className="flex items-center"></div>
-          <Card x-chunk="dashboard-06-chunk-0">
-            <CardHeader>
-              <CardTitle>Hasil Tes</CardTitle>
-              <CardDescription>
-                Hasil tes dan informasi lengkap mengenai kandidat yang menjalani
-                DiSC Test
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<div>Loading...</div>}>
+
+        { loading ? (
+          <div>Loading...</div>
+        ) : (
+          <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+            <Card x-chunk="dashboard-06-chunk-0">
+              <CardHeader>
+                <CardTitle>Hasil Tes</CardTitle>
+                <CardDescription>
+                  Hasil tes dan informasi lengkap mengenai kandidat yang
+                  menjalani DiSC Test
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -154,7 +176,7 @@ export function Dashboard() {
                   </TableHeader>
                   <TableBody>
                     {userDatas?.map((data, index) => (
-                      <TableRow key={data.id} onClick={() => alert(data.id)}>
+                      <TableRow key={data.id} onClick={() => handleDetailPage(data.id)}>
                         <TableCell>{data.email}</TableCell>
                         <TableCell>{data.name}</TableCell>
                         <TableCell className="hidden md:table-cell">
@@ -170,47 +192,52 @@ export function Dashboard() {
                           {data.domicile_city}
                         </TableCell>
                         <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
                               <Button
                                 aria-haspopup="true"
                                 size="icon"
                                 variant="ghost"
                               >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
+                                ...
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </Suspense>
-            </CardContent>
-            <CardFooter>
-              <div className="text-xs text-muted-foreground">
-                Showing <strong>1-10</strong> of <strong>32</strong> products
-              </div>
-            </CardFooter>
-          </Card>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious className={currentPage == 1 ? "hidden" : ""} onClick={() => onPageChange("prev")} />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext className={currentPage == 3 ? "hidden" : ""} onClick={() => onPageChange("next")} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </main>
+              </CardContent>
+              
+            </Card>
+
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    className={currentPage == 1 ? "hidden" : ""}
+                    onClick={() => handleChangePage(currentPage-1)}
+                  />
+                </PaginationItem>
+
+                {getPageNumbers().map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => handleChangePage(page)}
+                      className={page === currentPage ? "active bg-slate-100" : ""}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    className={currentPage == Math.ceil(paginationMetaData!.total/paginationMetaData!.limit) ? "hidden" : ""}
+                    onClick={() => handleChangePage(currentPage+1)}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </main>
+        )}
       </div>
     </div>
   );
