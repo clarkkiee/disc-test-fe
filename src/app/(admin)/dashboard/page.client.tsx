@@ -42,6 +42,7 @@ import {
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { getPaginationData } from "@/services/AdminActionServices";
 import { useRouter } from "next/navigation";
+import { useDebounce } from "use-debounce";
 
 type UserData = {
   id: string;
@@ -58,30 +59,40 @@ type PaginationMetaData = {
   page: number;
   limit: number;
   total: number;
-} | null
+} | null;
 
 export function Dashboard() {
   const router = useRouter();
+  const [searchTextInput, setSearchTextInput] = useState<string>("");
+  const [searchTextQuery] = useDebounce(searchTextInput, 700);
   const [userDatas, setUserDatas] = useState<UserData[] | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, isLoading] = useState<boolean>(true);
-  const [paginationMetaData, setPaginationMetaData] = useState<PaginationMetaData>(null)
-  const windowSize = 5
+  const [paginationMetaData, setPaginationMetaData] =
+    useState<PaginationMetaData>(null);
+  const windowSize = 5;
 
   const handleChangePage = (page: number) => {
     setCurrentPage(page);
-  }
+  };
 
   const fetchPaginationData = useCallback(async () => {
     isLoading(true);
-    const userDatasQ = await getPaginationData(currentPage);
-    setPaginationMetaData(userDatasQ.meta)
-    setUserDatas(userDatasQ.datas);
+    const userDatasQ = await getPaginationData(currentPage, searchTextQuery);
+    if (!userDatasQ) {
+      setPaginationMetaData(null);
+      setUserDatas(null);
+    } else {
+      setPaginationMetaData(userDatasQ.meta);
+      setUserDatas(userDatasQ.datas);
+    }
     isLoading(false);
-  }, [currentPage]);
+  }, [currentPage, searchTextQuery]);
 
   const getPageNumbers = () => {
-    const totalPages = Math.ceil(paginationMetaData!.total / paginationMetaData!.limit);
+    const totalPages = Math.ceil(
+      paginationMetaData!.total / paginationMetaData!.limit
+    );
     let startPage = Math.max(currentPage - Math.floor(windowSize / 2), 1);
     let endPage = Math.min(startPage + windowSize - 1, totalPages);
 
@@ -89,13 +100,15 @@ export function Dashboard() {
       startPage = Math.max(endPage - windowSize + 1, 1);
     }
 
-    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+    return Array.from(
+      { length: endPage - startPage + 1 },
+      (_, i) => startPage + i
+    );
   };
 
-  const handleDetailPage = ( userId: string ) => {
-    router.push(`dashboard/disc/${userId}/result`)
-    
-  }
+  const handleDetailPage = (userId: string) => {
+    router.push(`dashboard/disc/${userId}/result`);
+  };
 
   useEffect(() => {
     fetchPaginationData();
@@ -108,11 +121,14 @@ export function Dashboard() {
           <p>Hello, Admin</p>
           <div className="relative ml-auto flex-1 md:grow-0">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-            />
+            <form>
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+                onChange={(e) => setSearchTextInput(e.currentTarget.value)}
+              />
+            </form>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -141,7 +157,7 @@ export function Dashboard() {
           </DropdownMenu>
         </header>
 
-        { loading ? (
+        {loading ? (
           <div>Loading...</div>
         ) : (
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -154,88 +170,107 @@ export function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Nama</TableHead>
-                      <TableHead>Tanggal Lahir</TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Pendidikan Terakhir
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Posisi yang Dilamar
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Kota Domisili
-                      </TableHead>
-                      <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {userDatas?.map((data, index) => (
-                      <TableRow key={data.id} onClick={() => handleDetailPage(data.id)}>
-                        <TableCell>{data.email}</TableCell>
-                        <TableCell>{data.name}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.birthdate}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.latest_education}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.position_applied}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {data.domicile_city}
-                        </TableCell>
-                        <TableCell>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                ...
-                              </Button>
-                        </TableCell>
+                {userDatas == null ? (
+                  <div>Data not Found</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Nama</TableHead>
+                        <TableHead>Tanggal Lahir</TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          Pendidikan Terakhir
+                        </TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          Posisi yang Dilamar
+                        </TableHead>
+                        <TableHead className="hidden md:table-cell">
+                          Kota Domisili
+                        </TableHead>
+                        <TableHead>
+                          <span className="sr-only">Actions</span>
+                        </TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {userDatas?.map((data, index) => (
+                        <TableRow
+                          key={data.id}
+                          onClick={() => handleDetailPage(data.id)}
+                        >
+                          <TableCell>{data.email}</TableCell>
+                          <TableCell>{data.name}</TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.birthdate}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.latest_education}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.position_applied}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {data.domicile_city}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              aria-haspopup="true"
+                              size="icon"
+                              variant="ghost"
+                            >
+                              ...
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
-              
             </Card>
 
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    className={currentPage == 1 ? "hidden" : ""}
-                    onClick={() => handleChangePage(currentPage-1)}
-                  />
-                </PaginationItem>
-
-                {getPageNumbers().map((page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => handleChangePage(page)}
-                      className={page === currentPage ? "active bg-slate-100" : ""}
-                    >
-                      {page}
-                    </PaginationLink>
+            {paginationMetaData === null ? (
+              ""
+            ) : (
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      className={currentPage == 1 ? "hidden" : ""}
+                      onClick={() => handleChangePage(currentPage - 1)}
+                    />
                   </PaginationItem>
-                ))}
 
-                <PaginationItem>
-                  <PaginationNext
-                    className={currentPage == Math.ceil(paginationMetaData!.total/paginationMetaData!.limit) ? "hidden" : ""}
-                    onClick={() => handleChangePage(currentPage+1)}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {getPageNumbers().map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => handleChangePage(page)}
+                        className={
+                          page === currentPage ? "active bg-slate-100" : ""
+                        }
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      className={
+                        currentPage ==
+                        Math.ceil(
+                          paginationMetaData!.total / paginationMetaData!.limit
+                        )
+                          ? "hidden"
+                          : ""
+                      }
+                      onClick={() => handleChangePage(currentPage + 1)}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </main>
         )}
       </div>
