@@ -157,7 +157,7 @@ export function Dashboard() {
           </DropdownMenu>
         </header>
 
-        {loading ? (
+        { loading ? (
           <div>Loading...</div>
         ) : (
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
@@ -196,6 +196,7 @@ export function Dashboard() {
                     <TableBody>
                       {userDatas?.map((data, index) => (
                         <TableRow
+                          className="cursor-pointer"
                           key={data.id}
                           onClick={() => handleDetailPage(data.id)}
                         >
@@ -234,7 +235,7 @@ export function Dashboard() {
               ""
             ) : (
               <Pagination>
-                <PaginationContent>
+                <PaginationContent className="cursor-pointer">
                   <PaginationItem>
                     <PaginationPrevious
                       className={currentPage == 1 ? "hidden" : ""}
