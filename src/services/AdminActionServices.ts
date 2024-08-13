@@ -11,7 +11,17 @@ export async function getPaginationData( page?: number, search?: string ) {
             return res.data.data
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         return null
     }
 }
+
+export async function getDetailExamResult(userId: string) {
+    try {
+        const res = await apiClient.get(`/admin/exam/${userId}/result`)
+        return res.data.data
+    } catch (error) {
+        console.error(error)
+        return null
+    }
+} 
