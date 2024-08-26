@@ -19,10 +19,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { getDetailExamResult } from "@/services/AdminActionServices";
 import { useCallback, useEffect, useState } from "react";
+import DiSCResultChart from "./chart";
 
 type ExamineeBiodata = {
   id: string;
@@ -65,72 +65,93 @@ export default function ResultPage({ userId }: { userId: string }) {
   return (
     <>
       {loading === false ? (
-        <div className="flex gap-8 w-full">
-          <Card className="w-[30%] h-min">
-            <CardHeader>
-              <CardTitle>Biodata User</CardTitle>
-              <CardDescription>
-                User ID: {examData?.user.id.substring(0, 8)}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <div>
-                <CardDescription>Email</CardDescription>
-                <p>{examData?.user.email}</p>
-              </div>
-              <div>
-                <CardDescription>Nama</CardDescription>
-                <p>{examData?.user.name}</p>
-              </div>
-              <div>
-                <CardDescription>Tanggal Lahir</CardDescription>
-                <p>{examData?.user.birthdate}</p>
-              </div>
-              <div>
-                <CardDescription>Pendidikan terakhir</CardDescription>
-                <p>{examData?.user.latest_education}</p>
-              </div>
-              <div>
-                <CardDescription>Posisi yang Dilamar</CardDescription>
-                <p>{examData?.user.position_applied}</p>
-              </div>
-              <div>
-                <CardDescription>Kota Domisili</CardDescription>
-                <p>{examData?.user.domicile_city}</p>
-              </div>
-              <div>
-                <CardDescription>Asal Informasi</CardDescription>
-                <p>{examData?.user.source_information}</p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex flex-col gap-8 w-full items-center">
 
-          <Card className="w-[70%]">
-            <CardHeader>
-              <CardTitle>Hasil Tes</CardTitle>
-              <CardDescription></CardDescription>
-            </CardHeader>
-            <CardContent className="flex">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>No. Soal</TableHead>
-                    <TableHead>Paling Menggambarkan</TableHead>
-                    <TableHead>Paling Tidak Menggambarkan</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {examData?.exam_result.map((q, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{q.questionId}</TableCell>
-                      <TableCell>{q.answer_0}</TableCell>
-                      <TableCell>{q.answer_1}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+            <div className="flex gap-4 ">
+              <div className="flex gap-4 h-min">
+                <Card className="flex flex-col min-h px-4">
+                  <CardHeader>
+                    <CardTitle>Biodata</CardTitle>
+                    <CardDescription>
+                      User ID: {examData?.user.id.substring(0, 8)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-4">
+                    <div>
+                      <CardDescription>Email</CardDescription>
+                      <p>{examData?.user.email}</p>
+                    </div>
+                    <div>
+                      <CardDescription>Nama</CardDescription>
+                      <p>{examData?.user.name}</p>
+                    </div>
+                    <div>
+                      <CardDescription>Tanggal Lahir</CardDescription>
+                      <p>{examData?.user.birthdate}</p>
+                    </div>
+                    <div>
+                      <CardDescription>Pendidikan terakhir</CardDescription>
+                      <p>{examData?.user.latest_education}</p>
+                    </div>
+                    <div>
+                      <CardDescription>Posisi yang Dilamar</CardDescription>
+                      <p>{examData?.user.position_applied}</p>
+                    </div>
+                    <div>
+                      <CardDescription>Kota Domisili</CardDescription>
+                      <p>{examData?.user.domicile_city}</p>
+                    </div>
+                    <div>
+                      <CardDescription>Asal Informasi</CardDescription>
+                      <p>{examData?.user.source_information}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="flex flex-col">
+                  <CardHeader>
+                    <CardTitle>Jawaban</CardTitle>
+                    <CardDescription></CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-8">
+                    <Table>
+                        <ScrollArea className="flex h-[50vh] w-full ">
+                      <TableHeader className="sticky top-0 bg-white z-10">
+                        <TableRow>
+                          <TableHead>No</TableHead>
+                          <TableHead>M</TableHead>
+                          <TableHead>L</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                          <TableBody className="w-min">
+                              {examData?.exam_result.map((q, index) => (
+                                <TableRow key={index}>
+                                  <TableCell>{q.questionId}</TableCell>
+                                  <TableCell>{q.answer_0}</TableCell>
+                                  <TableCell>{q.answer_1}</TableCell>
+                                </TableRow>
+                              ))}
+                          </TableBody>
+                        </ScrollArea>
+                    </Table>
+                    <CardFooter className="p-0">
+                      <div className="text-xs text-muted-foreground">
+                        <strong>M</strong> : Paling Menggambarkan <br></br><br></br>
+                        <strong>L</strong> : Paling Tidak Menggambarkan 
+                      </div>
+                    </CardFooter>
+                  </CardContent>
+                </Card>
+              </div>
+
+
+              <Card className="flex p-4 w-min items-center justify-center">
+                <CardContent className="flex w-full justify-center items-center">
+                  <DiSCResultChart/>
+                </CardContent>
+              </Card>
+            </div>
+
+
         </div>
       ) : (
         <div>Loading....</div>
