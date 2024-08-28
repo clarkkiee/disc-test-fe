@@ -61,8 +61,6 @@ export default function ResultPage({ userId }: { userId: string }) {
     isLoading(false);
   }, [userId]);
 
-  console.log(examData)
-
   const processAndSendData = useCallback(async (examData: CompleteExamData | null) => {
     if (!examData) return;
 
