@@ -23,6 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { getDetailExamResult } from "@/services/AdminActionServices";
 import { useCallback, useEffect, useState } from "react";
 import DiSCResultChart from "./chart";
+import { processDiscData } from "@/services/DataProcessingServices";
 
 type ExamineeBiodata = {
   id: string;
@@ -50,6 +51,8 @@ type CompleteExamData = {
 export default function ResultPage({ userId }: { userId: string }) {
   const [examData, setExamData] = useState<CompleteExamData | null>(null);
   const [loading, isLoading] = useState<boolean>(true);
+  const [ answerDataPayload, setAnswerDataPayload ] = useState<string[]>([])
+  const [ processedData, setProcessedData ] = useState<number[][]>([])
 
   const fetchCompleteExamData = useCallback(async () => {
     isLoading(true);
@@ -58,9 +61,29 @@ export default function ResultPage({ userId }: { userId: string }) {
     isLoading(false);
   }, [userId]);
 
+  const processAndSendData = useCallback(async (examData: CompleteExamData | null) => {
+    if (!examData) return;
+
+    const payload = examData.exam_result.flatMap(dataEachNumber => [
+      dataEachNumber.answer_0,
+      dataEachNumber.answer_1,
+    ]);
+
+    setAnswerDataPayload(payload);
+
+    const resultdata = await processDiscData(payload);
+    setProcessedData(resultdata)
+  }, []);
+
   useEffect(() => {
     fetchCompleteExamData();
   }, [fetchCompleteExamData]);
+
+  useEffect(() => {
+    if (examData) {
+      processAndSendData(examData);
+    }
+  }, [examData, processAndSendData]);
 
   return (
     <>
@@ -135,18 +158,18 @@ export default function ResultPage({ userId }: { userId: string }) {
                     </Table>
                     <CardFooter className="p-0">
                       <div className="text-xs text-muted-foreground">
-                        <strong>M</strong> : Paling Menggambarkan <br></br><br></br>
-                        <strong>L</strong> : Paling Tidak Menggambarkan 
+                        <strong>M</strong> : Menggambarkan <br></br>
+                        <strong>L</strong> : Tidak Menggambarkan 
                       </div>
                     </CardFooter>
                   </CardContent>
                 </Card>
               </div>
 
-
-              <Card className="flex p-4 w-min items-center justify-center">
+              <Card className="flex p-2 w-min items-center justify-center">
                 <CardContent className="flex w-full justify-center items-center">
-                  <DiSCResultChart/>
+                  <DiSCResultChart processedData={processedData}/> 
+                  {/* Mirror, Mask, Core */}
                 </CardContent>
               </Card>
             </div>
