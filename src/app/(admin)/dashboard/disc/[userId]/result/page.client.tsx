@@ -61,6 +61,8 @@ export default function ResultPage({ userId }: { userId: string }) {
     isLoading(false);
   }, [userId]);
 
+  console.log(examData)
+
   const processAndSendData = useCallback(async (examData: CompleteExamData | null) => {
     if (!examData) return;
 
@@ -168,7 +170,7 @@ export default function ResultPage({ userId }: { userId: string }) {
 
               <Card className="flex p-2 w-min items-center justify-center">
                 <CardContent className="flex w-full justify-center items-center">
-                  <DiSCResultChart processedData={processedData}/> 
+                  <DiSCResultChart processedData={processedData} username={examData!.user.name}/> 
                   {/* Mirror, Mask, Core */}
                 </CardContent>
               </Card>

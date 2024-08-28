@@ -24,11 +24,12 @@ ChartJS.register(
     Legend
   );
 
-type ProcessedDataT = {
-    processedData: number[][]
+type ChartReq = {
+    processedData: number[][],
+    username: string;
 }
 
-const DiSCResultChart: React.FC<ProcessedDataT> = ({ processedData }) => {
+const DiSCResultChart: React.FC<ChartReq> = ({ processedData, username }) => {
 
     const divRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +44,7 @@ const DiSCResultChart: React.FC<ProcessedDataT> = ({ processedData }) => {
         // Buat link unduhan untuk gambar
         const link = document.createElement('a');
         link.href = dataUrl;
-        link.download = 'downloaded-image.png';
+        link.download = `${username}.png`;
 
         // Tambahkan link ke dokumen dan klik untuk mengunduh gambar
         document.body.appendChild(link);
